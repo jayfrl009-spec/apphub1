@@ -27,6 +27,7 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
 .tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 .tile{appearance:none;text-decoration:none;color:var(--text);background:#111814;border:1px solid var(--line);border-radius:17px;min-height:117px;padding:17px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;font:inherit}
 .tile:hover{border-color:#708b59;background:#172119;transform:translateY(-1px)}
+#workApps .tile:last-child{grid-column:auto}
 .tileIcon{width:42px;height:42px;border-radius:14px;background:#243226;display:grid;place-items:center;font-size:21px}
 .tile span:last-child{font-size:13px;font-weight:750}
 .recent{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#101612}.recentItem{display:flex;align-items:center;gap:12px;padding:12px 15px;border-top:1px solid var(--line)}.recentItem:first-child{border-top:0}.recentItem a{flex:1;min-width:0;color:var(--text);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.recentItem a:hover{color:var(--lime)}.recentItem small{display:block;color:var(--muted);font-size:11px}.recentItem button{border:1px solid var(--line);background:#1d291f;color:#dce6dc;border-radius:9px;padding:6px 9px;cursor:pointer}
@@ -34,7 +35,7 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
 .foot{margin-top:42px;padding-top:17px;border-top:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;color:var(--muted);font-size:12px}
 .notice{max-width:580px}
 #message{min-height:21px;color:#ffcb8d;font-size:12px;margin-top:10px}
-@media(max-width:650px){.shell{padding-top:20px}.top{margin-bottom:54px}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tile:last-child{grid-column:span 2}.searchbox{flex-wrap:wrap}.searchbox input{flex-basis:100%}.searchbox .btn{flex:1}.foot{flex-direction:column}.tag{display:none}}
+@media(max-width:650px){.shell{padding-top:20px}.top{margin-bottom:54px}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tile:last-child{grid-column:auto}.searchbox{flex-wrap:wrap}.searchbox input{flex-basis:100%}.searchbox .btn{flex:1}.foot{flex-direction:column}.tag{display:none}}
 </style>
 </head>
 <body>
@@ -52,7 +53,7 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
         <button class="btn primary" type="submit">Go ↗</button>
         <button class="btn secondary" type="button" id="newTabBtn">Open in new tab</button>
       </form>
-      <div class="hint">Press Enter to search or visit a site. Searches use Google SafeSearch.</div>
+      <div class="hint">To open an app directly, type its website (like canva.com) or use a shortcut below. Search phrases use Google SafeSearch.</div>
       <div id="message" role="status" aria-live="polite"></div>
     </section>
     <section class="section">
@@ -65,13 +66,26 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
         <a class="tile" href="https://github.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">⌘</span><span>GitHub</span></a>
       </div>
     </section>
+    <section class="section" id="workApps">
+      <div class="sectionhead"><h2>WORK & BUSINESS APPS</h2><p>Direct links — not web searches</p></div>
+      <div class="tiles">
+        <a class="tile" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">C</span><span>Canva</span></a>
+        <a class="tile" href="https://docs.google.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">▤</span><span>Google Docs</span></a>
+        <a class="tile" href="https://www.microsoft365.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">▦</span><span>Microsoft 365</span></a>
+        <a class="tile" href="https://www.notion.so/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">N</span><span>Notion</span></a>
+        <a class="tile" href="https://www.dropbox.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">◇</span><span>Dropbox</span></a>
+        <a class="tile" href="https://slack.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">#</span><span>Slack</span></a>
+        <a class="tile" href="https://trello.com/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">▧</span><span>Trello</span></a>
+        <a class="tile" href="https://zoom.us/" target="_blank" rel="noopener noreferrer"><span class="tileIcon">▣</span><span>Zoom</span></a>
+      </div>
+    </section>
     <section class="section">
       <div class="sectionhead"><h2>RECENTLY OPENED</h2><button class="btn secondary" type="button" id="clearHistory" style="padding:7px 10px">Clear</button></div>
       <div class="recent" id="recent"><div class="empty">Sites you open from this page will show up here on this device.</div></div>
     </section>
   </main>
   <footer class="foot">
-    <div class="notice">This is a start page, not a replacement for Chrome or Edge. Once a site opens, use your normal browser address bar, tabs, and back/forward buttons. Searches use SafeSearch; direct website access may still depend on website and network settings.</div>
+    <div class="notice">This is a start page, not a replacement for Chrome or Edge. Once a site opens, use your normal browser address bar, tabs, and back/forward buttons. Search phrases use SafeSearch; direct links open in your regular browser. Website access may still depend on website and network settings.</div>
     <div>AppHub • Browser home</div>
   </footer>
 </div>
