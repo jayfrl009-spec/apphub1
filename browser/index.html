@@ -138,7 +138,7 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
   form.addEventListener('submit',function(event){event.preventDefault();go(false)});
   document.getElementById('newTabBtn').addEventListener('click',function(){go(true)});
   document.getElementById('clearHistory').addEventListener('click',function(){localStorage.removeItem(HISTORY_KEY);renderHistory();message.textContent='Recent list cleared.'});
-  document.addEventListener('keydown',function(event){if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='l'){event.preventDefault();address.focus();address.select()}});
+  document.addEventListener('keydown',function(event){if(event.key==='/'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&document.activeElement!==address){event.preventDefault();address.focus()}});
   renderHistory();
 })();
 </script>
