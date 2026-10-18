@@ -18,22 +18,22 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
   <div class="brand"><div class="logo">↗</div><div><div class="eyebrow">APPHUB / TOOLS</div><div class="subtitle">A simple, allow-listed web relay</div></div></div>
   <div class="badge"><span class="dot"></span><span id="connectionLabel">SERVER NOT CONNECTED</span></div>
   <h1>Browse through <span>Relay.</span></h1>
-  <p class="intro">A clean web gateway for a site you own or are authorized to access. Add your deployed relay server below to connect the interface.</p>
+  <p class="intro">A clean web gateway with a built-in relay endpoint. The default configuration is limited to example.com.</p>
   <section class="panel">
     <div class="group">
       <label for="server">Relay server URL</label>
-      <input class="field" id="server" type="url" placeholder="https://your-worker.workers.dev" autocomplete="url" spellcheck="false">
-      <p class="small">This is the backend address, not the website you want to visit. Your setting is saved in this browser only.</p>
+      <input class="field" id="server" type="url" placeholder="https://your-project.vercel.app/api" autocomplete="url" spellcheck="false">
+      <p class="small">On the Vercel deployment, this fills in automatically. Your saved setting stays in this browser only.</p>
     </div>
     <div class="group">
       <label for="target">Allowed website URL</label>
       <div class="row"><input class="field" id="target" type="url" value="https://example.com/" placeholder="https://example.com/" autocomplete="url" spellcheck="false"><button class="btn primary" id="openBtn">Open through Relay ↗</button></div>
     </div>
     <div class="row"><button class="btn secondary" id="testBtn">Test connection</button><button class="btn secondary" id="clearBtn">Clear server URL</button></div>
-    <div class="status" role="status" aria-live="polite" id="status"><strong>Setup needed.</strong> GitHub hosts this page, but static pages cannot run a proxy server by themselves.</div>
+    <div class="status" role="status" aria-live="polite" id="status"><strong>Checking setup.</strong> The Vercel deployment includes the website and API endpoints.</div>
     <div class="notice">Relay servers should only forward to domains explicitly allowed by their owner. This starter defaults to <b>example.com</b>; it is not an all-sites unblocker and will not bypass network, account, or website restrictions.</div>
   </section>
-  <div class="bottom"><span>Relay • GitHub-hosted interface</span><a href="https://github.com/jayfrl009-spec/apphub1/tree/main/proxy" target="_blank" rel="noopener noreferrer">View source & setup guide ↗</a></div>
+  <div class="bottom"><span>Relay • Vercel-hosted interface</span><a href="https://github.com/jayfrl009-spec/apphub1/tree/main/proxy" target="_blank" rel="noopener noreferrer">View source & setup guide ↗</a></div>
 </main>
 <script>
 (function(){
@@ -41,12 +41,30 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
   const targetEl=document.getElementById("target");
   const statusEl=document.getElementById("status");
   const labelEl=document.getElementById("connectionLabel");
+  const isVercelHost=location.hostname.endsWith(".vercel.app");
   const saved=localStorage.getItem("relayServerUrl");
-  if(saved){serverEl.value=saved;labelEl.textContent="SERVER URL SAVED";statusEl.textContent="Server URL saved in this browser. Test the connection before opening a site."}
+  if(isVercelHost){
+    serverEl.value=location.origin+"/api";
+    localStorage.setItem("relayServerUrl",serverEl.value);
+    labelEl.textContent="BUILT-IN RELAY CONFIGURED";
+    statusEl.textContent="Built-in relay configured. The default allow-list contains only example.com.";
+  }else if(saved){
+    serverEl.value=saved;
+    labelEl.textContent="SERVER URL SAVED";
+    statusEl.textContent="Server URL saved in this browser. Test the connection before opening a site.";
+  }
   function serverUrl(){
     let raw=serverEl.value.trim();
     if(!raw)return "";
-    try{const u=new URL(raw);if(u.protocol!=="https:")throw new Error("Use an HTTPS server URL.");return u.origin}catch(e){throw new Error("Enter a valid HTTPS relay server URL.")}
+    try{
+      const u=new URL(raw);
+      if(u.protocol!=="https:")throw new Error("Use an HTTPS server URL.");
+      if(u.search||u.hash)throw new Error("The relay server URL must not contain a query or fragment.");
+      return u.origin+u.pathname.replace(/\\/+$/,"");
+    }catch(e){
+      if(e.message==="Use an HTTPS server URL."||e.message==="The relay server URL must not contain a query or fragment.")throw e;
+      throw new Error("Enter a valid HTTPS relay server URL.");
+    }
   }
   document.getElementById("testBtn").addEventListener("click",async function(){
     let base;
