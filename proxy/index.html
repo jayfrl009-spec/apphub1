@@ -27,7 +27,7 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     </div>
     <div class="group">
       <label for="target">Search or website address</label>
-      <div class="row"><input class="field" id="target" type="text" value="" placeholder="Search the web or enter example.com" autocomplete="off" spellcheck="false"><button class="btn primary" id="openBtn">Search / Open ↗</button></div>
+      <div class="row"><input class="field" id="target" type="text" value="" placeholder="Search the web or enter example.com" autocomplete="off" spellcheck="false"><button class="btn primary" id="openBtn">Search / Open ↗</button><button class="btn secondary" id="imageBtn" type="button">Search Images ▧</button></div>
       <p class="small">Searches use Google SafeSearch. Website addresses go through the relay’s approved-domain list.</p>
     </div>
     <div class="row"><button class="btn secondary" id="testBtn">Test connection</button><button class="btn secondary" id="clearBtn">Clear server URL</button></div>
@@ -121,6 +121,13 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     statusEl.textContent="Opening "+target.hostname+". If it is not enabled, it must be added to the relay allow-list."
   }
   document.getElementById("openBtn").addEventListener("click",openFromBar);
+  document.getElementById("imageBtn").addEventListener("click",function(){
+    const query=targetEl.value.trim();
+    if(!query){statusEl.textContent="Type a picture topic first.";targetEl.focus();return}
+    const url="https://www.google.com/search?tbm=isch&safe=active&q="+encodeURIComponent(query);
+    window.open(url,"_blank","noopener,noreferrer");
+    statusEl.textContent="Opening image results for "+query+" with SafeSearch enabled.";
+  });
   targetEl.addEventListener("keydown",function(event){
     if(event.key==="Enter")openFromBar();
   });
