@@ -82,14 +82,28 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     }catch(e){labelEl.textContent="CONNECTION FAILED";statusEl.textContent="Could not reach a compatible relay. Check the server URL and its CORS settings. "+e.message;}
   });
   document.getElementById("clearBtn").addEventListener("click",function(){serverEl.value="";localStorage.removeItem("relayServerUrl");labelEl.textContent="SERVER NOT CONNECTED";statusEl.textContent="Saved server URL cleared."});
+  function normalizeTargetUrl(value){
+    let raw=String(value||"").trim();
+    if(!raw)throw new Error("Type a website address first, like example.com.");
+    if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(raw))raw="https://"+raw;
+    let target;
+    try{target=new URL(raw)}catch(_){throw new Error("That website address doesn't look right. Try example.com or https://example.com.");}
+    if(target.protocol!=="https:")throw new Error("Use a secure website address that starts with https://.");
+    if(!target.hostname||target.username||target.password)throw new Error("Enter a normal website address without a username or password.");
+    return target;
+  }
   document.getElementById("openBtn").addEventListener("click",function(){
     let base,target;
-    try{base=serverUrl();if(!base)throw new Error("Deploy the backend and enter its HTTPS URL first.");target=new URL(targetEl.value.trim());if(target.protocol!=="https:")throw new Error("Enter an HTTPS website URL.");}
-    catch(e){statusEl.textContent=e.message;return}
+    try{
+      base=serverUrl();
+      if(!base)throw new Error("The relay server URL is missing. Reload this page and try again.");
+      target=normalizeTargetUrl(targetEl.value);
+      targetEl.value=target.href;
+    }catch(e){statusEl.textContent=e.message;return}
     localStorage.setItem("relayServerUrl",base);
     const dest=base+"/browse?url="+encodeURIComponent(target.href);
     window.open(dest,"_blank","noopener,noreferrer");
-    statusEl.textContent="Opened a new tab. If the domain is blocked, add its approved hostname to ALLOWED_HOSTS in Vercel and redeploy."
+    statusEl.textContent="Opening "+target.hostname+". If it is not enabled, ask the site owner to add it to the relay allow-list."
   });
 })();
 </script>
