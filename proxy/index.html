@@ -95,9 +95,9 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
   }
   function looksLikeWebsiteAddress(value){
     const raw=String(value||"").trim();
-    if(/^https?:\\/\\//i.test(raw))return true;
-    if(/\\s/.test(raw))return false;
-    return /^(localhost|(?:[a-z0-9-]+\\.)+[a-z]{2,})(?::[0-9]+)?(?:[/?#].*)?$/i.test(raw);
+    if(/^https?:\/\//i.test(raw))return true;
+    if(/\s/.test(raw))return false;
+    return /^(localhost|(?:[a-z0-9-]+\.)+[a-z]{2,})(?::[0-9]+)?(?:[/?#].*)?$/i.test(raw);
   }
   function searchTheWeb(query){
     const url="https://www.google.com/search?safe=active&q="+encodeURIComponent(query);
