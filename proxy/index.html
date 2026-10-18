@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b0f0d">
-<title>Relay — Web Gateway</title>
+<title>AppHub Browser</title>
 <style>
 :root{color-scheme:dark;--bg:#080b0a;--panel:#111715;--line:#27332d;--green:#caff3d;--muted:#9aa99f;--orange:#ffa45c}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1d2a1e 0,transparent 55%),var(--bg);color:#f2f7f0;font:16px/1.5 Inter,ui-sans-serif,system-ui,Arial,sans-serif;padding:24px;display:grid;place-items:center}
@@ -15,10 +15,10 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
 </head>
 <body>
 <main>
-  <div class="brand"><div class="logo">↗</div><div><div class="eyebrow">APPHUB / TOOLS</div><div class="subtitle">A simple, allow-listed web relay</div></div></div>
+  <div class="brand"><div class="logo">↗</div><div><div class="eyebrow">APPHUB / BROWSER</div><div class="subtitle">Search the web or open approved sites</div></div></div>
   <div class="badge"><span class="dot"></span><span id="connectionLabel">SERVER NOT CONNECTED</span></div>
-  <h1>Browse through <span>Relay.</span></h1>
-  <p class="intro">A clean web gateway with a built-in relay endpoint. The default configuration is limited to example.com.</p>
+  <h1>Search the <span>web.</span></h1>
+  <p class="intro">Type a question or keywords to search the web, or enter an approved website address. This is a browser-style web page, not a replacement for Chrome or Edge.</p>
   <section class="panel">
     <div class="group">
       <label for="server">Relay server URL</label>
@@ -26,12 +26,13 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
       <p class="small">On the Vercel deployment, this fills in automatically. Your saved setting stays in this browser only.</p>
     </div>
     <div class="group">
-      <label for="target">Allowed website URL</label>
-      <div class="row"><input class="field" id="target" type="url" value="https://example.com/" placeholder="https://example.com/" autocomplete="url" spellcheck="false"><button class="btn primary" id="openBtn">Open through Relay ↗</button></div>
+      <label for="target">Search or website address</label>
+      <div class="row"><input class="field" id="target" type="text" value="" placeholder="Search the web or enter example.com" autocomplete="off" spellcheck="false"><button class="btn primary" id="openBtn">Search / Open ↗</button></div>
+      <p class="small">Searches use Google SafeSearch. Website addresses go through the relay’s approved-domain list.</p>
     </div>
     <div class="row"><button class="btn secondary" id="testBtn">Test connection</button><button class="btn secondary" id="clearBtn">Clear server URL</button></div>
     <div class="status" role="status" aria-live="polite" id="status"><strong>Checking setup.</strong> The Vercel deployment includes the website and API endpoints.</div>
-    <div class="notice">Relay servers should only forward to domains explicitly allowed by their owner. The default is <b>example.com</b>. To allow another site you control or may access, add its hostname to <b>ALLOWED_HOSTS</b> in Vercel Project Settings → Environment Variables, separated by commas, then redeploy. Use <b>*.example.com</b> for subdomains and add <b>example.com</b> too if you need the root domain. This is not a bypass for network or website access restrictions.</div>
+    <div class="notice">Website addresses must be on the relay’s approved-domain list. The default is <b>example.com</b>. To allow a site you control or are authorized to access, add its hostname to <b>ALLOWED_HOSTS</b> in Vercel Project Settings → Environment Variables, then redeploy. This page does not bypass network restrictions, and some websites will not work through a relay.</div>
   </section>
   <div class="bottom"><span>Relay • Vercel-hosted interface</span><a href="https://github.com/jayfrl009-spec/apphub1/tree/main/proxy" target="_blank" rel="noopener noreferrer">View source & setup guide ↗</a></div>
 </main>
@@ -92,18 +93,36 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     if(!target.hostname||target.username||target.password)throw new Error("Enter a normal website address without a username or password.");
     return target;
   }
-  document.getElementById("openBtn").addEventListener("click",function(){
+  function looksLikeWebsiteAddress(value){
+    const raw=String(value||"").trim();
+    if(/^https?:\\/\\//i.test(raw))return true;
+    if(/\\s/.test(raw))return false;
+    return /^(localhost|(?:[a-z0-9-]+\\.)+[a-z]{2,})(?::[0-9]+)?(?:[/?#].*)?$/i.test(raw);
+  }
+  function searchTheWeb(query){
+    const url="https://www.google.com/search?safe=active&q="+encodeURIComponent(query);
+    window.open(url,"_blank","noopener,noreferrer");
+    statusEl.textContent="Opening web search with SafeSearch enabled.";
+  }
+  function openFromBar(){
+    const raw=targetEl.value.trim();
+    if(!raw){statusEl.textContent="Type a search phrase or website address first.";return}
+    if(!looksLikeWebsiteAddress(raw)){searchTheWeb(raw);return}
     let base,target;
     try{
       base=serverUrl();
       if(!base)throw new Error("The relay server URL is missing. Reload this page and try again.");
-      target=normalizeTargetUrl(targetEl.value);
-      targetEl.value=target.href;
+      target=normalizeTargetUrl(raw);
     }catch(e){statusEl.textContent=e.message;return}
+    targetEl.value=target.href;
     localStorage.setItem("relayServerUrl",base);
     const dest=base+"/browse?url="+encodeURIComponent(target.href);
     window.open(dest,"_blank","noopener,noreferrer");
-    statusEl.textContent="Opening "+target.hostname+". If it is not enabled, ask the site owner to add it to the relay allow-list."
+    statusEl.textContent="Opening "+target.hostname+". If it is not enabled, it must be added to the relay allow-list."
+  }
+  document.getElementById("openBtn").addEventListener("click",openFromBar);
+  targetEl.addEventListener("keydown",function(event){
+    if(event.key==="Enter")openFromBar();
   });
 })();
 </script>
