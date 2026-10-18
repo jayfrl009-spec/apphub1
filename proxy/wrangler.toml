@@ -1,0 +1,8 @@
+name = "authorized-site-relay"
+main = "worker.js"
+compatibility_date = "2026-10-18"
+
+[vars]
+# Exact hostnames only. Add sites you own or are authorized to relay.
+# Example: "example.com,www.example.com"
+ALLOWED_HOSTS = "example.com"
