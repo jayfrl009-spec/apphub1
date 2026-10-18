@@ -7,9 +7,11 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ status: "error", message: "GET only" });
   }
+  const allowedHosts = Array.from(getAllowedHosts()).sort();
   return res.status(200).json({
     status: "ok",
     mode: "allow-listed",
-    allowedHostCount: getAllowedHosts().size
+    allowedHostCount: allowedHosts.length,
+    allowedHosts
   });
 };
