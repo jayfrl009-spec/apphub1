@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0f0d">
+<title>Relay — Web Gateway</title>
+<style>
+:root{color-scheme:dark;--bg:#080b0a;--panel:#111715;--line:#27332d;--green:#caff3d;--muted:#9aa99f;--orange:#ffa45c}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1d2a1e 0,transparent 55%),var(--bg);color:#f2f7f0;font:16px/1.5 Inter,ui-sans-serif,system-ui,Arial,sans-serif;padding:24px;display:grid;place-items:center}
+main{width:min(100%,780px)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}.logo{width:48px;height:48px;border-radius:15px;background:var(--green);color:#10150d;display:grid;place-items:center;font-size:26px;font-weight:900;box-shadow:0 0 35px #caff3d22}.eyebrow{font-size:11px;letter-spacing:.2em;color:var(--green);font-weight:800}.subtitle{color:var(--muted);font-size:14px;margin-top:2px}
+h1{font-size:clamp(36px,7vw,62px);line-height:1;letter-spacing:-.055em;margin:0 0 12px}h1 span{color:var(--green)}.intro{color:var(--muted);max-width:600px;margin:0 0 26px}.panel{background:linear-gradient(140deg,#141c18,#0e1311);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 24px 80px #0006}
+label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#c8d4cb;font-weight:800;margin:0 0 8px}.field{width:100%;background:#080d0b;border:1px solid #334238;border-radius:12px;padding:14px 15px;color:#f2f7f0;font:inherit;outline:none}.field:focus{border-color:var(--green);box-shadow:0 0 0 3px #caff3d18}.group{margin-bottom:18px}.row{display:flex;gap:10px;flex-wrap:wrap}.row .field{flex:1;min-width:220px}.btn{border:0;border-radius:12px;padding:13px 17px;font-weight:850;font-size:14px;cursor:pointer}.primary{background:var(--green);color:#10150d}.secondary{background:#263129;color:#f2f7f0;border:1px solid #3a493e}.btn:focus-visible{outline:3px solid white;outline-offset:2px}.status{padding:13px 14px;background:#0a100d;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:13px;margin-top:15px}.status strong{color:var(--orange)}.small{font-size:12px;color:var(--muted);margin:13px 0 0}.bottom{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-top:19px;color:var(--muted);font-size:12px}.bottom a{color:var(--green);text-decoration:none}.bottom a:hover{text-decoration:underline}.notice{margin-top:18px;padding:13px 15px;border-left:3px solid var(--orange);background:#ffa45c0d;color:#d5d8d2;font-size:13px;border-radius:0 10px 10px 0}.badge{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid var(--line);border-radius:99px;font-size:11px;color:var(--muted);margin-bottom:18px}.dot{width:7px;height:7px;border-radius:50%;background:var(--orange)}@media(max-width:540px){body{padding:15px}.panel{padding:17px}.row .btn{width:100%}.brand{margin-bottom:24px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="logo">↗</div><div><div class="eyebrow">APPHUB / TOOLS</div><div class="subtitle">A simple, allow-listed web relay</div></div></div>
+  <div class="badge"><span class="dot"></span><span id="connectionLabel">SERVER NOT CONNECTED</span></div>
+  <h1>Browse through <span>Relay.</span></h1>
+  <p class="intro">A clean web gateway for a site you own or are authorized to access. Add your deployed relay server below to connect the interface.</p>
+  <section class="panel">
+    <div class="group">
+      <label for="server">Relay server URL</label>
+      <input class="field" id="server" type="url" placeholder="https://your-worker.workers.dev" autocomplete="url" spellcheck="false">
+      <p class="small">This is the backend address, not the website you want to visit. Your setting is saved in this browser only.</p>
+    </div>
+    <div class="group">
+      <label for="target">Allowed website URL</label>
+      <div class="row"><input class="field" id="target" type="url" value="https://example.com/" placeholder="https://example.com/" autocomplete="url" spellcheck="false"><button class="btn primary" id="openBtn">Open through Relay ↗</button></div>
+    </div>
+    <div class="row"><button class="btn secondary" id="testBtn">Test connection</button><button class="btn secondary" id="clearBtn">Clear server URL</button></div>
+    <div class="status" role="status" aria-live="polite" id="status"><strong>Setup needed.</strong> GitHub hosts this page, but static pages cannot run a proxy server by themselves.</div>
+    <div class="notice">Relay servers should only forward to domains explicitly allowed by their owner. This starter defaults to <b>example.com</b>; it is not an all-sites unblocker and will not bypass network, account, or website restrictions.</div>
+  </section>
+  <div class="bottom"><span>Relay • GitHub-hosted interface</span><a href="https://github.com/jayfrl009-spec/apphub1/tree/main/proxy" target="_blank" rel="noopener noreferrer">View source & setup guide ↗</a></div>
+</main>
+<script>
+(function(){
+  const serverEl=document.getElementById("server");
+  const targetEl=document.getElementById("target");
+  const statusEl=document.getElementById("status");
+  const labelEl=document.getElementById("connectionLabel");
+  const saved=localStorage.getItem("relayServerUrl");
+  if(saved){serverEl.value=saved;labelEl.textContent="SERVER URL SAVED";statusEl.textContent="Server URL saved in this browser. Test the connection before opening a site."}
+  function serverUrl(){
+    let raw=serverEl.value.trim();
+    if(!raw)return "";
+    try{const u=new URL(raw);if(u.protocol!=="https:")throw new Error("Use an HTTPS server URL.");return u.origin}catch(e){throw new Error("Enter a valid HTTPS relay server URL.")}
+  }
+  document.getElementById("testBtn").addEventListener("click",async function(){
+    let base;
+    try{base=serverUrl();if(!base)throw new Error("Add your relay server URL first.");}
+    catch(e){statusEl.textContent=e.message;return}
+    localStorage.setItem("relayServerUrl",base);
+    statusEl.textContent="Checking relay server…";
+    try{
+      const r=await fetch(base+"/health",{method:"GET"});
+      if(!r.ok)throw new Error("The server responded with HTTP "+r.status+".");
+      const data=await r.json();
+      if(data.status!=="ok")throw new Error("The URL responded, but it is not a compatible relay.");
+      labelEl.textContent="SERVER CONNECTED";
+      statusEl.textContent="Connection successful. The server is online. Only domains in its allow-list can be opened.";
+    }catch(e){labelEl.textContent="CONNECTION FAILED";statusEl.textContent="Could not reach a compatible relay. Check the server URL and its CORS settings. "+e.message;}
+  });
+  document.getElementById("clearBtn").addEventListener("click",function(){serverEl.value="";localStorage.removeItem("relayServerUrl");labelEl.textContent="SERVER NOT CONNECTED";statusEl.textContent="Saved server URL cleared."});
+  document.getElementById("openBtn").addEventListener("click",function(){
+    let base,target;
+    try{base=serverUrl();if(!base)throw new Error("Deploy the backend and enter its HTTPS URL first.");target=new URL(targetEl.value.trim());if(target.protocol!=="https:")throw new Error("Enter an HTTPS website URL.");}
+    catch(e){statusEl.textContent=e.message;return}
+    localStorage.setItem("relayServerUrl",base);
+    const dest=base+"/browse?url="+encodeURIComponent(target.href);
+    window.open(dest,"_blank","noopener,noreferrer");
+    statusEl.textContent="Opened a new tab. The relay will only serve target domains in its allow-list.";
+  });
+})();
+</script>
+</body>
+</html>
