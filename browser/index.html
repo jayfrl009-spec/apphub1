@@ -51,9 +51,10 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
       <form class="searchbox" id="searchForm">
         <input id="address" type="text" placeholder="Search Google or enter a website…" aria-label="Search or enter a website" autocomplete="off" spellcheck="false" autofocus>
         <button class="btn primary" type="submit">Go ↗</button>
+        <button class="btn secondary" type="button" id="imageSearchBtn">Search Images ▧</button>
         <button class="btn secondary" type="button" id="newTabBtn">Open in new tab</button>
       </form>
-      <div class="hint">To open an app directly, type its website (like canva.com) or use a shortcut below. Search phrases use Google SafeSearch.</div>
+      <div class="hint">To open an app directly, type its website (like canva.com) or use a shortcut below. Web and image searches open in Google with SafeSearch enabled.</div>
       <div id="message" role="status" aria-live="polite"></div>
     </section>
     <section class="section">
@@ -151,6 +152,17 @@ h1{font-size:clamp(42px,8vw,76px);line-height:.98;letter-spacing:-.065em;margin:
   }
   form.addEventListener('submit',function(event){event.preventDefault();go(false)});
   document.getElementById('newTabBtn').addEventListener('click',function(){go(true)});
+  document.getElementById('imageSearchBtn').addEventListener('click',function(){
+    const query=address.value.trim();
+    if(!query){message.textContent='Type what picture you want to find first.';address.focus();return}
+    if(isBlocked(query)||/pornhub|xvideos|xnxx|xhamster|redtube|youporn|tube8|spankbang|beeg|chaturbate/i.test(query)){
+      message.textContent='AppHub can’t search for that content. Try a general image topic instead.';return
+    }
+    const url='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(query);
+    saveRecent(url,'Images: '+query);
+    window.open(url,'_blank','noopener,noreferrer');
+    message.textContent='Opening image results for '+query+'…';
+  });
   document.getElementById('clearHistory').addEventListener('click',function(){localStorage.removeItem(HISTORY_KEY);renderHistory();message.textContent='Recent list cleared.'});
   document.addEventListener('keydown',function(event){if(event.key==='/'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&document.activeElement!==address){event.preventDefault();address.focus()}});
   renderHistory();
