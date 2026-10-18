@@ -31,7 +31,7 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     </div>
     <div class="row"><button class="btn secondary" id="testBtn">Test connection</button><button class="btn secondary" id="clearBtn">Clear server URL</button></div>
     <div class="status" role="status" aria-live="polite" id="status"><strong>Checking setup.</strong> The Vercel deployment includes the website and API endpoints.</div>
-    <div class="notice">Relay servers should only forward to domains explicitly allowed by their owner. This starter defaults to <b>example.com</b>; it is not an all-sites unblocker and will not bypass network, account, or website restrictions.</div>
+    <div class="notice">Relay servers should only forward to domains explicitly allowed by their owner. The default is <b>example.com</b>. To allow another site you control or may access, add its hostname to <b>ALLOWED_HOSTS</b> in Vercel Project Settings → Environment Variables, separated by commas, then redeploy. Use <b>*.example.com</b> for subdomains and add <b>example.com</b> too if you need the root domain. This is not a bypass for network or website access restrictions.</div>
   </section>
   <div class="bottom"><span>Relay • Vercel-hosted interface</span><a href="https://github.com/jayfrl009-spec/apphub1/tree/main/proxy" target="_blank" rel="noopener noreferrer">View source & setup guide ↗</a></div>
 </main>
@@ -47,7 +47,7 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     serverEl.value=location.origin+"/api";
     localStorage.setItem("relayServerUrl",serverEl.value);
     labelEl.textContent="BUILT-IN RELAY CONFIGURED";
-    statusEl.textContent="Built-in relay configured. The default allow-list contains only example.com.";
+    statusEl.textContent="Built-in relay configured. Click Test connection to see enabled hostnames."
   }else if(saved){
     serverEl.value=saved;
     labelEl.textContent="SERVER URL SAVED";
@@ -78,7 +78,7 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
       const data=await r.json();
       if(data.status!=="ok")throw new Error("The URL responded, but it is not a compatible relay.");
       labelEl.textContent="SERVER CONNECTED";
-      statusEl.textContent="Connection successful. The server is online. Only domains in its allow-list can be opened.";
+      statusEl.textContent="Relay online. Enabled domains: "+((Array.isArray(data.allowedHosts)&&data.allowedHosts.length)?data.allowedHosts.join(", "):"see ALLOWED_HOSTS in Vercel")+". Add approved domains in Vercel Environment Variables and redeploy to expand the list."
     }catch(e){labelEl.textContent="CONNECTION FAILED";statusEl.textContent="Could not reach a compatible relay. Check the server URL and its CORS settings. "+e.message;}
   });
   document.getElementById("clearBtn").addEventListener("click",function(){serverEl.value="";localStorage.removeItem("relayServerUrl");labelEl.textContent="SERVER NOT CONNECTED";statusEl.textContent="Saved server URL cleared."});
@@ -89,7 +89,7 @@ label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase
     localStorage.setItem("relayServerUrl",base);
     const dest=base+"/browse?url="+encodeURIComponent(target.href);
     window.open(dest,"_blank","noopener,noreferrer");
-    statusEl.textContent="Opened a new tab. The relay will only serve target domains in its allow-list.";
+    statusEl.textContent="Opened a new tab. If the domain is blocked, add its approved hostname to ALLOWED_HOSTS in Vercel and redeploy."
   });
 })();
 </script>
